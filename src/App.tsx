@@ -527,7 +527,7 @@ function App() {
         )}
 
         {/* No Results State */}
-        {searchedCoin === null && coinInput && !isLoading && (
+        {!webhookData && searchedCoin === null && coinInput && !isLoading && (
           <div className="max-w-2xl mx-auto text-center mt-16">
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12">
               <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
