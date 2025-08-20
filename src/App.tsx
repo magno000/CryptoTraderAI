@@ -141,7 +141,13 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      
+      if (!responseText) {
+        return {};
+      }
+      
+      const data = JSON.parse(responseText);
       return data;
     } catch (error) {
       console.error('Webhook error:', error);
