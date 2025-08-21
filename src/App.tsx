@@ -21,36 +21,9 @@ interface CoinData {
   suggestions: TradeSuggestion[];
 }
 
-interface WebhookResponse {
-  tradingPair?: string;
-  currentPrice?: number;
-  change24h?: number;
-  marketCap?: string;
-  volume?: string;
-  analysis?: {
-    type: 'buy' | 'sell' | 'hold';
-    confidence: number;
-    reason: string;
-    targetPrice: number;
-    stopLoss: number;
-    timeframe: string;
-    riskLevel: 'low' | 'medium' | 'high';
-  }[];
-  technicalIndicators?: {
-    rsi: number;
-    macd: string;
-    movingAverage: string;
-    support: number;
-    resistance: number;
-  };
-  marketSentiment?: string;
-  timestamp?: string;
-}
-
 function App() {
   const [coinInput, setCoinInput] = useState('');
   const [searchedCoin, setSearchedCoin] = useState<CoinData | null>(null);
-  const [webhookData, setWebhookData] = useState<WebhookResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -193,29 +166,20 @@ function App() {
 
     setError(null);
     setIsLoading(true);
-    setWebhookData(null);
-    setSearchedCoin(null);
     
     // Send to webhook and handle response
     sendToWebhook(coinInput)
       .then((webhookData) => {
-        console.log('Webhook response:', webhookResponse);
-        
-        // Store the webhook response
-        setWebhookData(webhookResponse);
-        
-        // If webhook has no data, fall back to mock data for demo
-        if (!webhookResponse || Object.keys(webhookResponse).length === 0) {
-          const coin = mockCoinData[coinInput.toUpperCase()];
-          setSearchedCoin(coin || null);
-        }
-        
+        // For now, still use mock data for display
+        // Replace this with actual webhook response data when your n8n workflow is ready
+        const coin = mockCoinData[coinInput.toUpperCase()];
+        setSearchedCoin(coin || null);
         setIsLoading(false);
       })
       .catch((error) => {
         console.error('Failed to send data to webhook:', error);
         setError('Failed to analyze trading pair. Please try again.');
-        setWebhookData(null);
+        setSearchedCoin(null);
         setIsLoading(false);
       });
   };
@@ -224,28 +188,17 @@ function App() {
     setCoinInput(coin);
     setError(null);
     setIsLoading(true);
-    setWebhookData(null);
-    setSearchedCoin(null);
     
     sendToWebhook(coin)
       .then((webhookData) => {
-        console.log('Webhook response:', webhookResponse);
-        
-        // Store the webhook response
-        setWebhookData(webhookResponse);
-        
-        // If webhook has no data, fall back to mock data for demo
-        if (!webhookResponse || Object.keys(webhookResponse).length === 0) {
-          const coinData = mockCoinData[coin];
-          setSearchedCoin(coinData || null);
-        }
-        
+        const coinData = mockCoinData[coin];
+        setSearchedCoin(coinData || null);
         setIsLoading(false);
       })
       .catch((error) => {
         console.error('Failed to send data to webhook:', error);
         setError('Failed to analyze trading pair. Please try again.');
-        setWebhookData(null);
+        setSearchedCoin(null);
         setIsLoading(false);
       });
   };
@@ -527,7 +480,7 @@ function App() {
         )}
 
         {/* No Results State */}
-        {!webhookData && searchedCoin === null && coinInput && !isLoading && (
+        {searchedCoin === null && coinInput && !isLoading && (
           <div className="max-w-2xl mx-auto text-center mt-16">
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12">
               <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
