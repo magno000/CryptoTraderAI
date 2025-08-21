@@ -25,7 +25,6 @@ function App() {
   const [coinInput, setCoinInput] = useState('');
   const [searchedCoin, setSearchedCoin] = useState<CoinData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Mock market overview data
   const marketStats = [
@@ -116,104 +115,20 @@ function App() {
 
   const popularCoins = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'ADAUSDT', 'DOTUSDT'];
 
-  const validateTradingPair = (input: string): boolean => {
-    const upperInput = input.toUpperCase();
-    // Check if it ends with common quote currencies
-    const quotecurrencies = ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'BUSD'];
-    return quotecurrencies.some(quote => upperInput.endsWith(quote));
-  };
-
-  const sendToWebhook = async (tradingPair: string) => {
-    try {
-      const response = await fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tradingPair: tradingPair.toUpperCase(),
-          timestamp: new Date().toISOString(),
-          requestId: Math.random().toString(36).substr(2, 9)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Webhook error:', error);
-      throw error;
-    }
-  };
-
   const handleSearch = () => {
     if (!coinInput.trim()) return;
     
-    // Validate trading pair format
-    if (!validateTradingPair(coinInput)) {
-      setError('Please include the quote currency (e.g., BTCUSDT, ETHUSDT, SOLUSDT)');
-      return;
-    }
-
-    setError(null);
     setIsLoading(true);
     
-    // Send to webhook and handle response
-    sendToWebhook(coinInput)
-      .then((webhookData) => {
-        // For now, still use mock data for display
-        // Replace this with actual webhook response data when your n8n workflow is ready
-        const coin = mockCoinData[coinInput.toUpperCase()];
-        setSearchedCoin(coin || null);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Failed to send data to webhook:', error);
-        setError('Failed to analyze trading pair. Please try again.');
-        setSearchedCoin(null);
-        setIsLoading(false);
-      });
+    // Simulate API call delay
+    setTimeout(() => {
+      const coin = mockCoinData[coinInput.toUpperCase()];
+      setSearchedCoin(coin || null);
+      setIsLoading(false);
+    }, 1500);
   };
 
   const handlePopularCoinClick = (coin: string) => {
-    setCoinInput(coin);
-    setError(null);
-    setIsLoading(true);
-    
-    sendToWebhook(coin)
-      .then((webhookData) => {
-        const coinData = mockCoinData[coin];
-        setSearchedCoin(coinData || null);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Failed to send data to webhook:', error);
-        setError('Failed to analyze trading pair. Please try again.');
-        setSearchedCoin(null);
-        setIsLoading(false);
-      });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase();
-    setCoinInput(value);
-    
-    // Clear error when user starts typing
-    if (error) {
-      setError(null);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  const handlePopularCoinClickOld = (coin: string) => {
     setCoinInput(coin);
     setIsLoading(true);
     setTimeout(() => {
@@ -222,7 +137,6 @@ function App() {
       setIsLoading(false);
     }, 1000);
   };
-
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -309,34 +223,24 @@ function App() {
           </div>
 
           {/* Warning Message */}
-          <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="flex items-center justify-center gap-2 mb-8">
             <AlertTriangle className="w-5 h-5 text-orange-400" />
-            <p className="text-orange-400 text-sm">Must include quote currency (e.g., BTCUSDT, ETHUSDT, SOLUSDT)</p>
+            <p className="text-orange-400 text-sm">Must include quote currency (e.g., BTCUSDT, ETHUSDT)</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <AlertTriangle className="w-5 h-5 text-red-400" />
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
           {/* Search Input */}
-          <div className="relative mb-6">
+          <div className="relative mb-8">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl"></div>
-              <div className={`relative bg-gray-900 border rounded-2xl p-2 ${
-                error ? 'border-red-500' : 'border-gray-700'
-              }`}>
+              <div className="relative bg-gray-900 border border-gray-700 rounded-2xl p-2">
                 <div className="flex items-center gap-4">
                   <div className="flex-1 relative">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="text"
                       value={coinInput}
-                      onChange={handleInputChange}
-                      onKeyPress={handleKeyPress}
+                      onChange={(e) => setCoinInput(e.target.value.toUpperCase())}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                       placeholder="BTCUSDT"
                       className="w-full pl-12 pr-6 py-4 bg-transparent text-white placeholder-gray-500 focus:outline-none text-lg font-medium"
                     />
