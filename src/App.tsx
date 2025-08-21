@@ -25,6 +25,7 @@ function App() {
   const [coinInput, setCoinInput] = useState('');
   const [searchedCoin, setSearchedCoin] = useState<CoinData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Mock market overview data
   const marketStats = [
@@ -119,23 +120,67 @@ function App() {
     if (!coinInput.trim()) return;
     
     setIsLoading(true);
+    setError(null);
+    setSearchedCoin(null);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const coin = mockCoinData[coinInput.toUpperCase()];
-      setSearchedCoin(coin || null);
+    // Llamada real al webhook de n8n
+    fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        symbol: coinInput.toUpperCase()
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      setSearchedCoin(data);
       setIsLoading(false);
-    }, 1500);
+    })
+    .catch(err => {
+      console.error('Error al conectar con el backend:', err);
+      setError(err.message || 'Error al conectar con el servidor');
+      setIsLoading(false);
+    });
   };
 
   const handlePopularCoinClick = (coin: string) => {
     setCoinInput(coin);
     setIsLoading(true);
-    setTimeout(() => {
-      const coinData = mockCoinData[coin];
-      setSearchedCoin(coinData || null);
+    setError(null);
+    setSearchedCoin(null);
+    
+    // Llamada real al webhook de n8n
+    fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        symbol: coin
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      setSearchedCoin(data);
       setIsLoading(false);
-    }, 1000);
+    })
+    .catch(err => {
+      console.error('Error al conectar con el backend:', err);
+      setError(err.message || 'Error al conectar con el servidor');
+      setIsLoading(false);
+    });
   };
 
   const getTypeColor = (type: string) => {
@@ -378,14 +423,33 @@ function App() {
         )}
 
         {/* No Results State */}
-        {searchedCoin === null && coinInput && !isLoading && (
+        {error && (
           <div className="max-w-2xl mx-auto text-center mt-16">
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12">
               <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold mb-2">Trading Pair Not Found</h3>
+              <h3 className="text-2xl font-semibold mb-2">Error de Conexión</h3>
               <p className="text-gray-400">
-                Sorry, we couldn't find data for "{coinInput}". 
-                Try searching for BTCUSDT, ETHUSDT, or SOLUSDT to see example results.
+                {error}
+              </p>
+              <button
+                onClick={() => setError(null)}
+                className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+              >
+                Intentar de nuevo
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* No Results State */}
+        {searchedCoin === null && coinInput && !isLoading && !error && (
+          <div className="max-w-2xl mx-auto text-center mt-16">
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12">
+              <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold mb-2">Sin Resultados</h3>
+              <p className="text-gray-400">
+                No se encontraron datos para "{coinInput}". 
+                Verifica que el símbolo sea correcto e incluya la moneda de cotización (ej: BTCUSDT).
               </p>
             </div>
           </div>
@@ -396,9 +460,9 @@ function App() {
           <div className="max-w-2xl mx-auto text-center mt-16">
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12">
               <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <h3 className="text-2xl font-semibold mb-2">Analyzing Market Data</h3>
+              <h3 className="text-2xl font-semibold mb-2">Analizando Datos del Mercado</h3>
               <p className="text-gray-400">
-                Our AI is processing market trends and generating trading suggestions...
+                Nuestra IA está procesando las tendencias del mercado y generando sugerencias de trading...
               </p>
             </div>
           </div>
