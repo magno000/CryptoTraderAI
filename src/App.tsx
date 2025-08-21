@@ -152,7 +152,7 @@ function App() {
 
   const sendToWebhook = async (tradingPair: string) => {
     try {
-      const response = await fetch('/api/webhook/CryptoTraderAI', {
+      const response = await fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
