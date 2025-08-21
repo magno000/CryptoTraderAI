@@ -140,6 +140,10 @@ function App() {
       return response.json();
     })
     .then(data => {
+      // Validar que los datos recibidos tengan las propiedades necesarias
+      if (!data || typeof data.currentPrice === 'undefined' || !data.name || !data.symbol) {
+        throw new Error('Los datos recibidos del servidor están incompletos o son inválidos');
+      }
       setSearchedCoin(data);
       setIsLoading(false);
     })
@@ -173,6 +177,10 @@ function App() {
       return response.json();
     })
     .then(data => {
+      // Validar que los datos recibidos tengan las propiedades necesarias
+      if (!data || typeof data.currentPrice === 'undefined' || !data.name || !data.symbol) {
+        throw new Error('Los datos recibidos del servidor están incompletos o son inválidos');
+      }
       setSearchedCoin(data);
       setIsLoading(false);
     })
