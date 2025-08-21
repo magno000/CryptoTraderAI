@@ -199,13 +199,13 @@ function App() {
     // Send to webhook and handle response
     sendToWebhook(coinInput)
       .then((webhookData) => {
-        console.log('Webhook response:', webhookResponse);
+        console.log('Webhook response:', webhookData);
         
         // Store the webhook response
-        setWebhookData(webhookResponse);
+        setWebhookData(webhookData);
         
         // If webhook has no data, fall back to mock data for demo
-        if (!webhookResponse || Object.keys(webhookResponse).length === 0) {
+        if (!webhookData || Object.keys(webhookData).length === 0) {
           const coin = mockCoinData[coinInput.toUpperCase()];
           setSearchedCoin(coin || null);
         }
@@ -229,13 +229,13 @@ function App() {
     
     sendToWebhook(coin)
       .then((webhookData) => {
-        console.log('Webhook response:', webhookResponse);
+        console.log('Webhook response:', webhookData);
         
         // Store the webhook response
-        setWebhookData(webhookResponse);
+        setWebhookData(webhookData);
         
         // If webhook has no data, fall back to mock data for demo
-        if (!webhookResponse || Object.keys(webhookResponse).length === 0) {
+        if (!webhookData || Object.keys(webhookData).length === 0) {
           const coinData = mockCoinData[coin];
           setSearchedCoin(coinData || null);
         }
