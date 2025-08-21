@@ -124,7 +124,7 @@ function App() {
     setSearchedCoin(null);
     
     // Llamada real al webhook de n8n
-    fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
+    fetch('/api/webhook/CryptoTraderAI', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -141,10 +141,26 @@ function App() {
     })
     .then(data => {
       // Validar que los datos recibidos tengan las propiedades necesarias
-      if (!data || typeof data.currentPrice === 'undefined' || !data.name || !data.symbol) {
-        throw new Error('Los datos recibidos del servidor están incompletos o son inválidos');
+      if (!data || typeof data !== 'object') {
+        throw new Error('Respuesta del servidor inválida');
       }
-      setSearchedCoin(data);
+      
+      // Crear objeto con valores por defecto si faltan datos
+      const coinData = {
+        symbol: data.symbol || coinInput.toUpperCase(),
+        name: data.name || coinInput.toUpperCase(),
+        currentPrice: typeof data.currentPrice === 'number' ? data.currentPrice : 0,
+        change24h: typeof data.change24h === 'number' ? data.change24h : 0,
+        marketCap: data.marketCap || 'N/A',
+        volume: data.volume || 'N/A',
+        suggestions: Array.isArray(data.suggestions) ? data.suggestions : []
+      };
+      
+      if (coinData.currentPrice === 0) {
+        throw new Error('No se pudo obtener el precio actual de la criptomoneda');
+      }
+      
+      setSearchedCoin(coinData);
       setIsLoading(false);
     })
     .catch(err => {
@@ -161,7 +177,7 @@ function App() {
     setSearchedCoin(null);
     
     // Llamada real al webhook de n8n
-    fetch('https://n8n.datascienceforbusinessia.com:8445/webhook/CryptoTraderAI', {
+    fetch('/api/webhook/CryptoTraderAI', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -178,10 +194,26 @@ function App() {
     })
     .then(data => {
       // Validar que los datos recibidos tengan las propiedades necesarias
-      if (!data || typeof data.currentPrice === 'undefined' || !data.name || !data.symbol) {
-        throw new Error('Los datos recibidos del servidor están incompletos o son inválidos');
+      if (!data || typeof data !== 'object') {
+        throw new Error('Respuesta del servidor inválida');
       }
-      setSearchedCoin(data);
+      
+      // Crear objeto con valores por defecto si faltan datos
+      const coinData = {
+        symbol: data.symbol || coin,
+        name: data.name || coin,
+        currentPrice: typeof data.currentPrice === 'number' ? data.currentPrice : 0,
+        change24h: typeof data.change24h === 'number' ? data.change24h : 0,
+        marketCap: data.marketCap || 'N/A',
+        volume: data.volume || 'N/A',
+        suggestions: Array.isArray(data.suggestions) ? data.suggestions : []
+      };
+      
+      if (coinData.currentPrice === 0) {
+        throw new Error('No se pudo obtener el precio actual de la criptomoneda');
+      }
+      
+      setSearchedCoin(coinData);
       setIsLoading(false);
     })
     .catch(err => {
